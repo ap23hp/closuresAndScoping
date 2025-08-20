@@ -25,10 +25,12 @@ const gameBoard = () => {
       ? (board[row][col] = symbol)
       : console.log(`Spot already taken!.`);
   };
+  const isBoardFull = () => board.flat().every((cell) => cell !== "");
   return {
     getBoard,
     placeMarker,
     printBoard,
+    isBoardFull,
   };
 };
 
@@ -44,8 +46,12 @@ const game = gameBoard();
 // game.placeMarker(2, 2, "O");
 
 //game.printBoard();
+game.isBoardFull();
 
 const playerFactory = (name, symbol) => {
+  const currentPlayer = () => {
+    console.log(`It's ${name}'s turn `);
+  };
   sayHello = () => {
     console.log(`${name} plays as ${symbol}`);
   };
@@ -53,15 +59,24 @@ const playerFactory = (name, symbol) => {
     name,
     symbol,
     sayHello,
+    currentPlayer,
   };
 };
 const alice = playerFactory("Alice", "X");
 const bob = playerFactory("Bob", "O");
 console.log(alice, bob);
 alice.sayHello();
+alice.currentPlayer();
+
+
 
 const playRoundFactory = () => {
   let currentPlayer = alice; // starting player
+  let gameOver = false;
+  const switchPlayer = () => {
+    currentPlayer = currentPlayer === alice ? bob : alice;
+    console.log(`Now it's ${currentPlayer.name}'s turn!`);
+  };
   const winningCombos = [
     // rows
     [
@@ -121,22 +136,47 @@ const playRoundFactory = () => {
   };
 
   const playRound = (row, col) => {
+  if (gameOver) {
+  console.log("Game already finished!");
+  return;
+}
     game.placeMarker(row, col, currentPlayer.symbol);
     if (!checkWinner()) {
-      currentPlayer = currentPlayer === alice ? bob : alice; // switch only if no winner
+      if (game.isBoardFull()) {
+        console.log("It's a draw!");
+        gameOver=true
+      } else {
+        switchPlayer();
+      }
+    } else{
+          gameOver=true 
     }
   };
-
   return {
     playRound,
+    switchPlayer,
   };
 };
 
 const round = playRoundFactory();
 
+// round.playRound(0, 0); // Alice
+// round.playRound(1, 0); // Bob
+// round.playRound(0, 1); // Alice
+// round.playRound(1, 1); // Bob
+// round.playRound(0, 2); // Alice should win now
+// game.printBoard();
+
+
+
 round.playRound(0, 0); // Alice
-round.playRound(1, 0); // Bob
-round.playRound(0, 1); // Alice
+round.playRound(0, 1); // Bob
+round.playRound(0, 2); // Alice
 round.playRound(1, 1); // Bob
-round.playRound(0, 2); // Alice should win now
+round.playRound(1, 0); // Alice
+round.playRound(1, 2); // Bob
+round.playRound(2, 1); // Alice
+round.playRound(2, 0); // Bob
+round.playRound(2, 2); // Alice
 game.printBoard();
+round.playRound(2, 0); // Bob
