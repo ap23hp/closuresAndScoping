@@ -116,18 +116,18 @@ function start() {
 
 start(); // apple
 
-function outer() {
-  const animal = "dog";
+// function outer() {
+//   const animal = "dog";
 
-  function inner() {
-    console.log(animal);
-  }
+//   function inner() {
+//     console.log(animal);
+//   }
 
-  return inner;
-}
+//   return inner;
+// }
 
-const fn = outer();
-fn(); // dog
+//const fn = outer();
+//fn(); // dog
 
 
 let count = 0;
@@ -166,25 +166,25 @@ bob.upvote();
 //console.log(alice.getReputation()); // 2
 //console.log(bob.getReputation());   // 1
 
-for (var i = 1; i <= 3; i++) {
-  setTimeout(function () {
-    console.log("var:", i);
-  }, 100);
-}
+// for (var i = 1; i <= 3; i++) {
+//   setTimeout(function () {
+//     console.log("var:", i);
+//   }, 100);
+// }
 
-for (let j = 1; j <= 3; j++) {
-  setTimeout(function () {
-    console.log("let:", j);
-  }, 100);
-}
+// for (let j = 1; j <= 3; j++) {
+//   setTimeout(function () {
+//     console.log("let:", j);
+//   }, 100);
+// }
 
-//var = one shared variable for the whole loop.let = new variable binding each iteration.
+// //var = one shared variable for the whole loop.let = new variable binding each iteration.
 
-for (var i = 1; i <= 3; i++) {
-  (function(iCopy) {
-    setTimeout(() => console.log("fixed var:", iCopy), 100);
-  })(i);
-}
+// for (var i = 1; i <= 3; i++) {
+//   (function(iCopy) {
+//     setTimeout(() => console.log("fixed var:", iCopy), 100);
+//   })(i);
+// }
 
 // Here’s what happens on each iteration:When the loop is at i = 1:
 // The IIFE is immediately called with argument 1.So inside that IIFE, iCopy = 1.
@@ -193,3 +193,46 @@ for (var i = 1; i <= 3; i++) {
 // That closure remembers its own private variable = 2.When the loop is at i = 3:Same story, iCopy = 3.
 
 // Result: 3 different variables (iCopy), each locked inside a closure.So you get 1, 2, 3.
+
+console.log(`----------------------------------------------------------------------`)
+//       function outer1() {
+//         const outerVar = "Hey I am the outer Var";
+
+//   function inner1() {
+//           const innerVar = "hey I am an inner var";
+//           console.log(innerVar);
+//           console.log(outerVar);
+//         }
+//    return inner1
+//       }
+// const innerFn = outer1();
+// innerFn()
+
+function createGreeting(greeting = "") {
+  const myGreet = greeting.toUpperCase();
+
+  return function(name) {
+    return `${myGreet} ${name}`;
+  };
+}
+
+const sayHello = createGreeting('hello');
+const sayHey = createGreeting('hey');
+console.log(sayHello('wes'));
+console.log(sayHello('kait'));
+console.log(sayHey('kait'));
+
+function createGame(gameName){
+  let score = 0;
+
+  return function win(){
+    score ++;
+    return `Your name ${gameName} score is ${score}`
+  }
+}
+
+const hockeyGame = createGame('Hockey');
+console.log(hockeyGame())
+console.log(hockeyGame())
+console.log(hockeyGame())
+console.log(hockeyGame())
