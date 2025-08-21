@@ -68,11 +68,23 @@ console.log(alice, bob);
 alice.sayHello();
 alice.currentPlayer();
 
+const scoreModule = (() => {
+  let scoreBoard = { alice: 0, bob: 0, draws: 0 };
 
+  const updateScore = (winner) => {
+    if (winner) scoreBoard[winner.toLowerCase()]++;
+    else scoreBoard.draws++;
+  };
+
+  const printScore = () => console.log(scoreBoard);
+
+  return { updateScore, printScore };
+})();
 
 const playRoundFactory = () => {
   let currentPlayer = alice; // starting player
   let gameOver = false;
+
   const switchPlayer = () => {
     currentPlayer = currentPlayer === alice ? bob : alice;
     console.log(`Now it's ${currentPlayer.name}'s turn!`);
@@ -134,27 +146,71 @@ const playRoundFactory = () => {
     }
     return false;
   };
-
+  let winner = null; // store winner
   const playRound = (row, col) => {
-  if (gameOver) {
-  console.log("Game already finished!");
-  return;
-}
-    game.placeMarker(row, col, currentPlayer.symbol);
-    if (!checkWinner()) {
-      if (game.isBoardFull()) {
+    if (gameOver) {
+      console.log("Game already finished!");
+      return;
+    }
+    const board = game.getBoard();
+    game.getBoard();
+    // Check if move is valid
+    if (board[row][col] === "") {
+      game.placeMarker(row, col, currentPlayer.symbol);
+
+      if (checkWinner()) {
+        gameOver = true;
+        winner = currentPlayer.name; // store winner
+        console.log(`${winner} wins the game!`);
+      } else if (game.isBoardFull()) {
+        gameOver = true;
+        winner = null; // draw
         console.log("It's a draw!");
-        gameOver=true
-      } else {
+      } else if (!checkWinner() && !game.isBoardFull()) {
         switchPlayer();
       }
-    } else{
-          gameOver=true 
+    } else {
+      console.log("Invalid move! Try again.");
+      return;
     }
+  };
+  const getStatus = () => {
+    if (gameOver) {
+      return {
+        status: winner ? "winner" : "draw",
+        winner: winner,
+        nextPlayer: null,
+      };
+    } else {
+      return {
+        status: "running",
+        winner: null,
+        nextPlayer: currentPlayer.name,
+      };
+    }
+  };
+
+  const resetGame = () => {
+    const board = game.getBoard();
+    // Board ke har cell empty ho jaye.
+    for (let r = 0; r < board.length; r++) {
+      for (let c = 0; c < board[r].length; c++) {
+        board[r][c] = "";
+      }
+    }
+    gameOver = false;
+
+    currentPlayer = alice;
+
+    console.log("Game reset! New round started.");
+    game.printBoard();
+    return board;
   };
   return {
     playRound,
     switchPlayer,
+    getStatus,
+    resetGame,
   };
 };
 
@@ -167,16 +223,45 @@ const round = playRoundFactory();
 // round.playRound(0, 2); // Alice should win now
 // game.printBoard();
 
+// round.playRound(0, 0); // Alice
+// round.playRound(0, 1); // Bob
+// round.playRound(0, 2); // Alice
+// round.playRound(1, 1); // Bob
+// round.playRound(1, 0); // Alice
+// round.playRound(1, 2); // Bob
+// round.playRound(2, 1); // Alice
+// round.playRound(2, 0); // Bob
+// round.playRound(2, 2); // Alice
+// game.printBoard();
 
+//1. Running state test
+//     round.playRound(0, 0); // Alice
+// console.log(round.getStatus());
+//2. Draw state test
+// round.playRound(0, 0); // Alice
+// round.playRound(0, 1); // Bob
+// round.playRound(0, 2); // Alice
+// round.playRound(1, 1); // Bob
+// round.playRound(1, 0); // Alice
+// round.playRound(1, 2); // Bob
+// round.playRound(2, 1); // Alice
+// round.playRound(2, 0); // Bob
+// round.playRound(2, 2); // Alice
+// console.log(round.getStatus());
+// scoreModule.updateScore()
+// scoreModule.printScore()
+// console.log(round.resetGame())
+//3. Winner state test
 
 round.playRound(0, 0); // Alice
-round.playRound(0, 1); // Bob
-round.playRound(0, 2); // Alice
+round.playRound(0, 0); // Bob
+//round.playRound(1, 0); // Bob
+round.playRound(0, 1); // Alice
 round.playRound(1, 1); // Bob
-round.playRound(1, 0); // Alice
-round.playRound(1, 2); // Bob
-round.playRound(2, 1); // Alice
-round.playRound(2, 0); // Bob
-round.playRound(2, 2); // Alice
-game.printBoard();
-round.playRound(2, 0); // Bob
+round.playRound(0, 2); // Alice wins
+const status = round.getStatus();
+console.log("Status before updating score:", status);
+
+scoreModule.updateScore(status.winner);
+scoreModule.printScore();
+round.resetGame();
